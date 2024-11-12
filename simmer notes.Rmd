@@ -1,0 +1,65 @@
+---
+title: "simmer notes"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(simmer)
+```
+
+Documentation at <https://r-simmer.org/>.
+
+## Basic constructs in simmer
+
+### simmer
+
+env \<- simmer(name) starts a simmer simulation environment
+
+```{r}
+env <- simmer("CrownCourtsSim")
+env
+```
+
+### add_resource
+
+add_resource(name, capacity) creates a resource with a certain capacity in the environment, e.g.
+
+```{r}
+env %>%
+  add_resource("crown_court", 5)
+
+```
+
+### trajectory
+
+trajectory(name) - starts a trajectory for an incoming person/item, e.g.
+
+```{r}
+individual <- trajectory("individual's path") %>%
+  ## add an intake activity
+  seize("crown_court") %>%
+  ## use this resource for some time
+  timeout(function() rnorm(1, 15)) %>%
+  ## then release this resource
+  release("crown_court", 1)
+```
+
+### add_generator
+
+Add_generator(name, trajectory, distribution of arrival times) creates a source of incoming people, e.g.
+
+```{r}
+env %>%
+    add_generator("individual", individual, function() rnorm(1,10,2))
+```
+
+### run
+
+run(time) runs the simulation environment until time 'time'
+
+```{r}
+env %>%
+  run(50) %>%
+  print()
+```
